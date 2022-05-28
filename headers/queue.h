@@ -11,7 +11,7 @@ struct Queue {
 };
 
 struct Queue *createQueue(int N);
-void enqueue(struct Queue *queue, Car car);
+void enqueue(struct Queue *queue, Car *car);
 int dequeue(struct Queue *queue);
 
 #endif

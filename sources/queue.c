@@ -20,12 +20,12 @@ struct Queue *createQueue(int N) {
 }
 
 // Add an item to the queue
-void enqueue(struct Queue *queue, Car car) {
+void enqueue(struct Queue *queue, Car *car) {
 
     queue->rear = (queue->rear + 1)%queue->capacity;
-    queue->Array_of_cars[queue->rear] = car;
+    queue->Array_of_cars[queue->rear] = *car;
     queue->count_cars += 1;
-    printf("Car (%d) wants to pass the bridge (was added to the queue).\n", car.id);
+    printf("Car (%d) wants to pass the bridge (was added to the queue).\n", car->id);
 }
 
 // Remove from the queue (the car has passed the bridge successfully - let's hope)

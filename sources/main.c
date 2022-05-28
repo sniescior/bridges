@@ -10,7 +10,12 @@
 
 int N = 10;
 
-void bridge(Car *car);
+typedef struct Thread_args {
+    Car *car;
+    struct Queue *queue;
+} Thread_args;
+
+void bridge(Thread_args thread_args);
 void *town(void *args);
 void init_cars(Town *A, Town *B, int N, Car *cars_list, pthread_t *th);
 void init_thread(Town *town, Car car, pthread_t *th);
@@ -29,7 +34,7 @@ int main(int argc, char const *argv[]) {
 
     int i;
     for(i = 0; i < N; i++) {
-        enqueue(Bridge_queue, Cars_list[i]);
+        enqueue(Bridge_queue, Cars_list+i);
     }
 
     print_status(&A, &B, Cars_list, Bridge_queue);
@@ -39,13 +44,13 @@ int main(int argc, char const *argv[]) {
 
 void *town(void *arg) {
 
-    Car car = *(Car*)arg;
+    Thread_args thread_args = *(Thread_args*)arg;
     int random = rand() % 10 + 1;
-    printf("Car %d waiting in town (%d sekonds).\n", car.id, random);
+    printf("Car %d waiting in town (%d sekonds).\n", thread_args.car->id, random);
 
     sleep(random);
 
-    bridge(&car);
+    bridge(thread_args);
 }
 
 void init_cars(Town *A, Town *B, int N, Car *Cars_list, pthread_t *th) {
@@ -95,8 +100,9 @@ void print_status(Town *A, Town *B, Car *Cars_list, struct Queue *queue) {
     printf("] <<<%d %d-B\n", B_queue, B->count_cars);
 }
 
-void bridge(Car *car) {
-    printf("Car %d is passing the bridge.\n", car->id);
+void bridge(Thread_args thread_args) {
+    printf("Car %d is passing the bridge.\n", thread_args.car->id);
+    enqueue(thread_args.queue, thread_args.car);
 }
 
 
