@@ -1,7 +1,7 @@
 SOURCES := $(wildcard sources/*.c)
 
 all:
-	gcc -o bridges $(SOURCES) -I headers
+	gcc -o bridges -pthread $(SOURCES) -I headers
 
 install: all
 	cp bridges /usr/bin
