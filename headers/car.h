@@ -12,6 +12,6 @@ typedef struct Car {
 } Car;
 
 void init_cars(Town *A, Town *B, int N, Car *cars_list, pthread_t *th);
-void init_thread(Town *town, Car car, pthread_t *th);
+void init_thread(Town *A, Town *B, int N, Car *cars_list, pthread_t *th);
 
 #endif

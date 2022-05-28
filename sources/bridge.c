@@ -22,7 +22,7 @@ void print_status(Town *A, Town *B, Car *Cars_list, struct Queue *queue) {
     printf("] <<<%d %d-B\n", B_queue, B->count_cars);
 }
 
-void bridge(Thread_args thread_args) {
+void *bridge(struct Thread_args thread_args) {
     printf("Car %d is passing the bridge.\n", thread_args.car->id);
     enqueue(thread_args.queue, thread_args.car);
 

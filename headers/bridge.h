@@ -7,6 +7,6 @@
 #include "../headers/thread.h"
 
 void print_status(Town *A, Town *B, Car *Cars_list, struct Queue *queue);
-void bridge(Thread_args thread_args);
+void *bridge(struct Thread_args thread_args);
 
 #endif

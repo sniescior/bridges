@@ -8,11 +8,13 @@
 
 void *town(void *arg) {
 
-    Thread_args thread_args = *(Thread_args*)arg;
+    int id = *(int*)arg;
     int random = rand() % 10 + 1;
-    printf("Car %d waiting in town (%d sekonds).\n", thread_args.car->id, random);
+    printf("Car %d chilling in town (%d seconds).\n", id, random);
 
     sleep(random);
 
-    bridge(thread_args);
+    printf("Car %d wants to pass the bridge now.\n", id);
+
+    // bridge(*thread_args);
 }

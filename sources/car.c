@@ -9,6 +9,14 @@
 #include "../headers/town.h"
 #include "../headers/thread.h"
 
+void init_thread(Town *A, Town *B, int N, Car *cars_list, pthread_t *th) {
+
+    if(pthread_create(&th[cars_list->id], NULL, &town, &(cars_list->id)) != 0) { 
+        perror("Failed to create thread.\n");
+        exit(1);
+    }
+}
+
 void init_cars(Town *A, Town *B, int N, Car *Cars_list, pthread_t *th) {
 
     srand(time(NULL));
@@ -18,10 +26,11 @@ void init_cars(Town *A, Town *B, int N, Car *Cars_list, pthread_t *th) {
     B->count_cars = N - a;
 
     int i;
+    
     for(i = 0; i < A->count_cars; i++) {
         Cars_list[i].id = i;
         Cars_list[i].Town = A;
-        init_thread(A, Cars_list[i], th);
+        init_thread(A, B, N, &Cars_list[i], th);
     }
 
     printf("\n");
@@ -29,10 +38,14 @@ void init_cars(Town *A, Town *B, int N, Car *Cars_list, pthread_t *th) {
     for(i = A->count_cars; i < N; i++) {
         Cars_list[i].id = i;
         Cars_list[i].Town = B;
-        init_thread(B, Cars_list[i], th);
+        init_thread(A, B, N, &Cars_list[i], th);
+    }
+
+    for(i = 0; i < N; i++) {
+        if(pthread_join(th[i], NULL) != 0) {
+            perror("Failed to join thread.\n");
+            exit(2);
+        }
     }
 }
 
-void init_thread(Town *town, Car car, pthread_t *th) {
-    printf("Thread initialization (%d %s).\n", car.id, car.Town->name);
-}
