@@ -4,60 +4,11 @@
 #include <string.h>
 #include <pthread.h>
 #include <unistd.h>
+#include "../headers/queue.h"
+#include "../headers/car.h"
+#include "../headers/town.h"
 
 int N = 10;
-
-// Town A i B
-typedef struct Town {
-    int count_cars;
-    char *name;
-} Town;
-
-// Struct representing a car (aka thread)
-typedef struct Car {
-    struct Town *Town;
-    int id;
-    pthread_t thread_id;
-} Car;
-
-// Queue of cars waiting to pass the bridge
-struct Queue {
-    int count_cars, capacity, front, rear;
-    struct Car *Array_of_cars;
-};
-
-struct Queue *createQueue(int N) {
-
-    struct Queue *queue = (struct Queue*)malloc(
-        sizeof(struct Queue)
-    );
-
-    queue->capacity = N;
-    queue->front = queue->count_cars = 0;
-
-    queue->rear = N - 1;
-    queue->Array_of_cars = (Car*)malloc(
-        queue->capacity * sizeof(Car)
-    );
-
-    return queue;
-}
-
-// Add an item to the queue
-void enqueue(struct Queue *queue, Car car) {
-
-    queue->rear = (queue->rear + 1)%queue->capacity;
-    queue->Array_of_cars[queue->rear] = car;
-    queue->count_cars += 1;
-    printf("Car (%d) wants to pass the bridge (was added to the queue).\n", car.id);
-}
-
-// Remove from the queue (the car has passed the bridge successfully - let's hope)
-int dequeue(struct Queue *queue) {
-    
-    queue->front = (queue->front + 1) % queue->capacity;
-    queue->count_cars -= 1;
-}
 
 void bridge(Car *car);
 void *town(void *args);
