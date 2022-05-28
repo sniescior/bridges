@@ -3,7 +3,7 @@
 #include "../headers/queue.h"
 #include "../headers/thread.h"
 
-void print_status(Town *A, Town *B, Car *Cars_list, struct Queue *queue) {
+void print_status(Town *A, Town *B, struct Queue *queue) {
 
     // Count cars on the A/B town side of the bridge
     int A_queue = 0, B_queue = 0, i;
@@ -26,5 +26,5 @@ void *bridge(struct Thread_args thread_args) {
     printf("Car %d is passing the bridge.\n", thread_args.car->id);
     enqueue(thread_args.queue, thread_args.car);
 
-    print_status(&(thread_args.A), &(thread_args.B), thread_args.Cars_list, thread_args.queue);
+    print_status(&(thread_args.A), &(thread_args.B), thread_args.queue);
 }

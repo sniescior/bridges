@@ -6,13 +6,11 @@
 #include "../headers/town.h"
 #include "../headers/queue.h"
 
-struct Thread_args {
+typedef struct Thread_args {
     Town A;
     Town B;
     Car *car;
-    Car *Cars_list;
-    
     struct Queue *queue;
-} *args;
+} Thread_args;
 
 #endif

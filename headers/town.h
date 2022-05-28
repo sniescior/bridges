@@ -6,6 +6,4 @@ typedef struct Town {
     char *name;
 } Town;
 
-void *town(void *args);
-
 #endif
