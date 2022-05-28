@@ -7,19 +7,12 @@
 #include "../headers/queue.h"
 #include "../headers/car.h"
 #include "../headers/town.h"
+#include "../headers/thread.h"
 
 int N = 10;
 
-typedef struct Thread_args {
-    Car *car;
-    struct Queue *queue;
-} Thread_args;
-
-void bridge(Thread_args thread_args);
-void *town(void *args);
 void init_cars(Town *A, Town *B, int N, Car *cars_list, pthread_t *th);
 void init_thread(Town *town, Car car, pthread_t *th);
-void print_status(Town *A, Town *B, Car *Cars_list, struct Queue *queue);
 
 int main(int argc, char const *argv[]) {
 
@@ -32,25 +25,7 @@ int main(int argc, char const *argv[]) {
 
     struct Queue *Bridge_queue = createQueue(N);
 
-    int i;
-    for(i = 0; i < N; i++) {
-        enqueue(Bridge_queue, Cars_list+i);
-    }
-
-    print_status(&A, &B, Cars_list, Bridge_queue);
-
     return 0;
-}
-
-void *town(void *arg) {
-
-    Thread_args thread_args = *(Thread_args*)arg;
-    int random = rand() % 10 + 1;
-    printf("Car %d waiting in town (%d sekonds).\n", thread_args.car->id, random);
-
-    sleep(random);
-
-    bridge(thread_args);
 }
 
 void init_cars(Town *A, Town *B, int N, Car *Cars_list, pthread_t *th) {
@@ -79,30 +54,6 @@ void init_cars(Town *A, Town *B, int N, Car *Cars_list, pthread_t *th) {
 
 void init_thread(Town *town, Car car, pthread_t *th) {
     printf("Thread initialization (%d %s).\n", car.id, car.Town->name);
-}
-
-void print_status(Town *A, Town *B, Car *Cars_list, struct Queue *queue) {
-
-    // Count cars on the A/B town side of the bridge
-    int A_queue = 0, B_queue = 0, i;
-    for(i = 0; i < queue->count_cars; i++) {
-        if(!strcmp(queue->Array_of_cars[i].Town->name, "A")) {
-            // Car is waiting on the A town side
-            A_queue += 1;
-        } else {
-            // Car is waiting on the B town side
-            B_queue += 1;
-        }
-    }
-
-    printf("A-%d %d>>> [", A->count_cars, A_queue);
-
-    printf("] <<<%d %d-B\n", B_queue, B->count_cars);
-}
-
-void bridge(Thread_args thread_args) {
-    printf("Car %d is passing the bridge.\n", thread_args.car->id);
-    enqueue(thread_args.queue, thread_args.car);
 }
 
 
