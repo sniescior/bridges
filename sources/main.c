@@ -18,6 +18,7 @@ void init_cars(Town *A, Town *B, int N, Car *cars_list, pthread_t *th, struct Qu
 void init_thread(Town *A, Town *B, int N, Car *cars_list, pthread_t *th, struct Queue *queue);
 
 int main(int argc, char const *argv[]) {
+
     pthread_mutex_init(&mutex, NULL);
 
     struct Town A, B;
@@ -31,10 +32,14 @@ int main(int argc, char const *argv[]) {
     init_cars(&A, &B, N, Cars_list, th, Bridge_queue);
 
     pthread_mutex_destroy(&mutex);
+
+    printf("Final queue cars count: %d\n", Bridge_queue->count_cars);
+
     return 0;
 }
 
 void *town(void *arg) {
+
     Thread_args *thread_args = (Thread_args *)arg;
 
     int random = rand() % 10 + 1;
@@ -44,18 +49,13 @@ void *town(void *arg) {
     
     enqueue(thread_args->queue, thread_args->car);
 
-    for(int i = 0; i < thread_args->queue->count_cars; i++) {
-        printf("%d : ", thread_args->queue->Array_of_cars[i].id);
-    }
-
-    printf("\n");
-
     pthread_mutex_lock(&mutex);
     bridge(*thread_args);
     pthread_mutex_unlock(&mutex);
 }
 
 void init_cars(Town *A, Town *B, int N, Car *Cars_list, pthread_t *th, struct Queue *queue) {
+
     srand(time(NULL));
     int a = rand() % 10 + 1;
 
@@ -87,6 +87,7 @@ void init_cars(Town *A, Town *B, int N, Car *Cars_list, pthread_t *th, struct Qu
 }
 
 void init_thread(Town *A, Town *B, int N, Car *cars_list, pthread_t *th, struct Queue *queue) {
+    
     Thread_args *thread_args;
     thread_args = (Thread_args*)malloc(sizeof(Thread_args));
     thread_args->A = *A;

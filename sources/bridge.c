@@ -1,12 +1,10 @@
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 #include "../headers/queue.h"
 #include "../headers/thread.h"
 
 void print_status(Town *A, Town *B, struct Queue *queue, Car car) {
-
-    // Count cars on the A/B town side of the bridge
-    // dequeue(queue);
 
     int A_queue = 0, B_queue = 0, i;
 
@@ -19,10 +17,9 @@ void print_status(Town *A, Town *B, struct Queue *queue, Car car) {
             B_queue += 1;
         }
     }
-    
 
     if(strcmp(car.Town->name, "A")) {
-        printf("A-%d %d>>> [<<  %d <<", A->count_cars, A_queue, car.id);
+        printf("A-%d %d>>> [<< %d <<", A->count_cars, A_queue, car.id);
         printf("] <<<%d %d-B", B_queue, B->count_cars);
     } else {
         printf("A-%d %d>>> [>> %d >>", A->count_cars, A_queue, car.id);
@@ -33,7 +30,9 @@ void print_status(Town *A, Town *B, struct Queue *queue, Car car) {
 }
 
 void *bridge(struct Thread_args thread_args) {
-    // printf("Car %d is passing the bridge.\n", thread_args.car->id);
 
+    dequeue(thread_args.queue);
+
+    sleep(5);
     print_status(&(thread_args.A), &(thread_args.B), thread_args.queue, *thread_args.car);
 }
