@@ -4,8 +4,6 @@
 #include <string.h>
 #include <pthread.h>
 #include <unistd.h>
-#include "../headers/queue.h"
 #include "../headers/car.h"
 #include "../headers/town.h"
-#include "../headers/thread.h"
 

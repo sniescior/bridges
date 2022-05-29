@@ -4,103 +4,128 @@
 #include <string.h>
 #include <pthread.h>
 #include <unistd.h>
-#include "../headers/queue.h"
 #include "../headers/car.h"
 #include "../headers/town.h"
 #include "../headers/thread.h"
-#include "../headers/bridge.h"
 
 int N = 10;
 pthread_mutex_t mutex;
 
-void *town(void *args);
-void init_cars(Town *A, Town *B, int N, Car *cars_list, pthread_t *th, struct Queue *queue);
-void init_thread(Town *A, Town *B, int N, Car *cars_list, pthread_t *th, struct Queue *queue);
+struct arg_struct {
+    Town *A;
+    Town *B;
+    Car *car;
+} *args;
 
-int main(int argc, char const *argv[]) {
+void init_cars();
+void init_town(Town *town, char *name);
+void bridge(void *arg);
+void init_threads();
 
-    pthread_mutex_init(&mutex, NULL);
-
-    struct Town A, B;
-    A.name = "A";
-    B.name = "B";
-    pthread_t th[N];
-    Car Cars_list[N];
-
-    struct Queue *Bridge_queue = createQueue(N);
-
-    init_cars(&A, &B, N, Cars_list, th, Bridge_queue);
-
-    pthread_mutex_destroy(&mutex);
-
-    printf("Final queue cars count: %d.\n", Bridge_queue->count_cars);
-    printf("Final cars count in A: %d, B: %d.\n", A.count_cars, B.count_cars);
-
-    return 0;
-}
-
-void *town(void *arg) {
-
-    Thread_args *thread_args = (Thread_args *)arg;
-
-    int random = rand() % 10 + 1;
-    printf("Car %d chilling in town %s (%d seconds).\n", thread_args->car->id, thread_args->car->Town->name, random);
-
-    sleep(random);
-    
-    enqueue(thread_args->queue, thread_args->car);
+void *town(void* arg) {
+    int town_tour_time = rand() % 10 + 1;
+    sleep(town_tour_time);
 
     pthread_mutex_lock(&mutex);
-    bridge(*thread_args);
+
+    bridge(arg);
+
     pthread_mutex_unlock(&mutex);
 }
 
-void init_cars(Town *A, Town *B, int N, Car *Cars_list, pthread_t *th, struct Queue *queue) {
+int main(int argc, char const *argv[]) {
+    pthread_mutex_init(&mutex, NULL);
+    pthread_t th[N];
 
-    srand(time(NULL));
-    int a = rand() % 10 + 1;
+    Town A, B;
+    init_town(&A, "A");
+    init_town(&B, "B");
 
-    A->count_cars = a;
-    B->count_cars = N - a;
+    Car *car_list;
+    car_list = malloc(N*sizeof(Car));
+    init_cars(&A, &B, car_list);
 
-    printf("Initial cars count in town A: %d and B: %d.\n", A->count_cars, B->count_cars);
-
+    printf("Initial:\n");
     int i;
-
-    for(i = 0; i < A->count_cars; i++) {
-        Cars_list[i].id = i;
-        Cars_list[i].Town = A;
-    }
-
-    for(i = A->count_cars; i < N; i++) {
-        Cars_list[i].id = i;
-        Cars_list[i].Town = B;
+    for(i = 0; i < N; i++) {
+        printf("%s %d\n", car_list[i].Town->name, car_list[i].id);
     }
 
     for(i = 0; i < N; i++) {
-        init_thread(A, B, N, &Cars_list[i], th, queue);
+        args = malloc(sizeof(struct arg_struct));
+        args->A = &A;
+        args->B = &B;
+        args->car = &car_list[i];
+
+        if(pthread_create(&th[i], NULL, &town, args) != 0) { 
+            perror("Failed to create thread.\n");
+            exit(1);
+        }
     }
 
     for(i = 0; i < N; i++) {
         if(pthread_join(th[i], NULL) != 0) {
             perror("Failed to join thread.\n");
-            exit(2);
+            return 2;
         }
+    }
+
+    printf("Final:\n");
+    for(i = 0; i < N; i++) {
+        printf("%s %d\n", car_list[i].Town->name, car_list[i].id);
+    }
+
+    pthread_mutex_destroy(&mutex);
+
+    return 0;
+}
+
+void init_town(Town *town, char *name) {
+    town->name = name;
+}
+
+void init_cars(Town *A, Town *B, Car *car_list) {
+    int i, a, b;
+    srand(time(NULL));
+    a = rand() % N + 1;
+    b = N - a;
+    A->count_cars = a;
+    B->count_cars = b;
+
+    for(i = 0; i < a; i++) {
+        Car car;
+        car.id = i;
+        car.Town = A;
+        car.Destination = B;
+        car_list[i] = car;
+    }
+
+    for(i = a; i < N; i++) {
+        Car car;
+        car.id = i;
+        car.Town = B;
+        car.Destination = A;
+        car_list[i] = car;
     }
 }
 
-void init_thread(Town *A, Town *B, int N, Car *cars_list, pthread_t *th, struct Queue *queue) {
-    
-    Thread_args *thread_args;
-    thread_args = (Thread_args*)malloc(sizeof(Thread_args));
-    thread_args->A = *A;
-    thread_args->B = *B;
-    thread_args->car = cars_list;
-    thread_args->queue = queue;
+void bridge(void *arg) {
+    struct arg_struct *args = arg;
 
-    if(pthread_create(&th[cars_list->id], NULL, &town, (void *)thread_args) != 0) { 
-        perror("Failed to create thread.\n");
-        exit(1);
+    sleep(5);
+
+    if(args->car->Town == args->A) {
+        args->A->count_cars -= 1;
+        printf("A-%d x>>> [>> %d >>] <<<x %d-B\n", args->car->Town->count_cars, args->car->id, args->car->Destination->count_cars);
+        args->car->Town = args->B;
+        args->car->Destination = args->A;
+        args->B->count_cars += 1;
+    } else {
+        args->B->count_cars -= 1;
+        printf("A-%d x>>> [<< %d <<] <<<x %d-B\n", args->car->Destination->count_cars, args->car->id, args->car->Town->count_cars);
+        args->car->Town = args->A;
+        args->car->Destination = args->B;
+        args->A->count_cars += 1;
     }
 }
 

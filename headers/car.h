@@ -7,6 +7,7 @@
 // Struct representing a car (aka thread)
 typedef struct Car {
     struct Town *Town;
+    struct Town *Destination;
     int id;
 } Car;
 

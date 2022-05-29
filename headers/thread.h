@@ -1,16 +1,15 @@
-#ifndef THREAD_H_
-#define THREAD_H_
+#ifndef CAR_H_
+#define CAR_H_
 
 #include <pthread.h>
-#include "../headers/car.h"
 #include "../headers/town.h"
-#include "../headers/queue.h"
+#include "../headers/car.h"
 
-typedef struct Thread_args {
-    Town A;
-    Town B;
-    Car *car;
-    struct Queue *queue;
-} Thread_args;
+
+typedef struct Thread {
+    struct Town *A;
+    struct Town *B;
+    struct Car *car;
+} Thread;
 
 #endif
