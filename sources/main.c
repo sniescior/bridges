@@ -33,7 +33,8 @@ int main(int argc, char const *argv[]) {
 
     pthread_mutex_destroy(&mutex);
 
-    printf("Final queue cars count: %d\n", Bridge_queue->count_cars);
+    printf("Final queue cars count: %d.\n", Bridge_queue->count_cars);
+    printf("Final cars count in A: %d, B: %d.\n", A.count_cars, B.count_cars);
 
     return 0;
 }
@@ -62,6 +63,8 @@ void init_cars(Town *A, Town *B, int N, Car *Cars_list, pthread_t *th, struct Qu
     A->count_cars = a;
     B->count_cars = N - a;
 
+    printf("Initial cars count in town A: %d and B: %d.\n", A->count_cars, B->count_cars);
+
     int i;
 
     for(i = 0; i < A->count_cars; i++) {
@@ -69,7 +72,7 @@ void init_cars(Town *A, Town *B, int N, Car *Cars_list, pthread_t *th, struct Qu
         Cars_list[i].Town = A;
     }
 
-    for(i = A->count_cars - 1; i < N; i++) {
+    for(i = A->count_cars; i < N; i++) {
         Cars_list[i].id = i;
         Cars_list[i].Town = B;
     }

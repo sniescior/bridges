@@ -26,7 +26,7 @@ void enqueue(struct Queue *queue, Car *car) {
     queue->Array_of_cars[queue->rear] = *car;
     queue->count_cars += 1;
 
-    printf("\tCar (%d) wants to pass the bridge (was added to the queue).\n", car->id);
+    printf(" + ( %d %s )", car->id, car->Town->name);
 }
 
 // Remove from the queue (the car has passed the bridge successfully - let's hope)
