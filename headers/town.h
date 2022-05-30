@@ -8,4 +8,6 @@ typedef struct Town {
     char *name;
 } Town;
 
+void init_town(Town *town, char *name);
+
 #endif
