@@ -1,5 +1,5 @@
-#ifndef CAR_H_
-#define CAR_H_
+#ifndef THREAD_H_
+#define THREAD_H_
 
 #include <pthread.h>
 #include "../headers/town.h"

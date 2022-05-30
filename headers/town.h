@@ -4,7 +4,7 @@
 #include "../headers/car.h"
 
 typedef struct Town {
-    int count_cars;
+    int count_cars;     // Number of cars in town
     char *name;
 } Town;
 
