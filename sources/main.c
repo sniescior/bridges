@@ -25,24 +25,26 @@ void bridge(void *arg);
 void init_thread(Town *A, Town *B, Car *car_list, int i, pthread_t *th, struct Queue *queue_a, struct Queue *queue_b);
 
 void *town(void* arg) {
-    struct arg_struct *args = arg;
-    int town_tour_time = rand() % 10 + 1;
+    while(1) {
+        struct arg_struct *args = arg;
+        int town_tour_time = rand() % 10 + 1;
 
-    printf("\tCar %d chilling in town %s (%d seconds). (queue_a = %d queue_b = %d)\n", args->car->id, args->car->Town->name, town_tour_time, args->queue_a->count_cars, args->queue_b->count_cars);
+        printf("\tCar %d chilling in town %s (%d seconds). (queue_a = %d queue_b = %d)\n", args->car->id, args->car->Town->name, town_tour_time, args->queue_a->count_cars, args->queue_b->count_cars);
 
-    sleep(town_tour_time);
+        sleep(town_tour_time);
 
-    printf("\t\tCar %d would want to pass the bridge now.\n", args->car->id);
+        printf("\t\tCar %d would want to pass the bridge now.\n", args->car->id);
 
-    if(args->car->Town == args->A) {
-        args->queue_a->count_cars += 1;
-    } else {
-        args->queue_b->count_cars += 1;
+        if(args->car->Town == args->A) {
+            args->queue_a->count_cars += 1;
+        } else {
+            args->queue_b->count_cars += 1;
+        }
+
+        pthread_mutex_lock(&mutex);
+        bridge(arg);
+        pthread_mutex_unlock(&mutex);
     }
-
-    pthread_mutex_lock(&mutex);
-    bridge(arg);
-    pthread_mutex_unlock(&mutex);
 }
 
 int main(int argc, char const *argv[]) {
