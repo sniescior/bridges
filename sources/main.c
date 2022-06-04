@@ -4,7 +4,6 @@
 #include <string.h>
 #include <pthread.h>
 #include <unistd.h>
-#include <stdbool.h>
 #include "../headers/car.h"
 #include "../headers/town.h"
 #include "../headers/thread.h"
@@ -14,6 +13,8 @@
 
 int N = 10;
 pthread_mutex_t mutex;
+pthread_cond_t bridge_cond;
+int free_bridge = 1;    // 1 - bridge is free | 0 - bridge is occupied
 
 struct arg_struct {
     Town *A;
@@ -43,15 +44,21 @@ void *town(void* arg) {
         } else {
             args->queue_b->count_cars += 1;
         }
-
         pthread_mutex_lock(&mutex);
-        bridge(arg);
+        if(free_bridge) {
+            bridge(arg);
+            printf("Bridge released.\n");
+        } else {
+            printf("Bridge occupied. Waiting...\n");
+            pthread_cond_wait(&bridge_cond, &mutex);
+        }
         pthread_mutex_unlock(&mutex);
     }
 }
 
 int main(int argc, char const *argv[]) {
     pthread_mutex_init(&mutex, NULL);
+    pthread_cond_init(&bridge_cond, NULL);
     pthread_t th[N];
 
     Town A, B;
@@ -69,6 +76,7 @@ int main(int argc, char const *argv[]) {
     init_cars(&A, &B, car_list, th, &queue_a, &queue_b);
 
     pthread_mutex_destroy(&mutex);
+    pthread_cond_destroy(&bridge_cond);
 
     return 0;
 }
@@ -110,6 +118,7 @@ void init_cars(Town *A, Town *B, Car *car_list, pthread_t *th, struct Queue *que
 }
 
 void bridge(void *arg) {
+    free_bridge = 0;
     struct arg_struct *args = arg;
 
     if(args->car->Town == args->A) {
@@ -130,6 +139,8 @@ void bridge(void *arg) {
 
     sleep(5);
 
+    free_bridge = 1;
+    pthread_cond_signal(&bridge_cond);
     free(arg);
 }
 
