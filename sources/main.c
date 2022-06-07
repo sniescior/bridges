@@ -42,8 +42,10 @@ void *town(void* arg) {
 
         if(args->car->Town == args->A) {
             args->queue_a->count_cars += 1;
+            args->queue_a->cars_array[args->car->id] = args->car->id;
         } else {
             args->queue_b->count_cars += 1;
+            args->queue_b->cars_array[args->car->id] = args->car->id;
         }
 
         pthread_mutex_lock(&mutex);
@@ -92,7 +94,15 @@ int main(int argc, char * const argv[]) {
     struct Queue queue_a;
     struct Queue queue_b;
     queue_a.count_cars = 0;
+    queue_a.cars_array = (int*)malloc(sizeof(int)*N);
     queue_b.count_cars = 0;
+    queue_b.cars_array = (int*)malloc(sizeof(int)*N);
+
+    int i;
+    for(i = 0; i < N; i++)  {
+        queue_a.cars_array[i] = -1;
+        queue_b.cars_array[i] = -1;
+    }
 
     init_cars(&A, &B, car_list, th, &queue_a, &queue_b);
 
@@ -140,17 +150,58 @@ void init_cars(Town *A, Town *B, Car *car_list, pthread_t *th, struct Queue *que
 void bridge(void *arg) {
     struct arg_struct *args = arg;
 
+    int i;
     if(args->car->Town == args->A) {
         args->A->count_cars -= 1;
         args->queue_a->count_cars -= 1;
+
+        args->queue_a->cars_array[args->car->id] = -1;
+
         printf("A-%d %d>>> [>> %d >>] <<<%d %d-B\n", args->car->Town->count_cars, args->queue_a->count_cars, args->car->id, args->queue_b->count_cars, args->car->Destination->count_cars);
+
+        printf("A queue: ");
+        for(i = 0; i < N; i++) {
+            if(args->queue_a->cars_array[i] != -1) {
+                printf(" %d ", args->queue_a->cars_array[i]);
+            }
+        }
+
+        printf("\nB queue:");
+        for(i = 0; i < N; i++) {
+            if(args->queue_b->cars_array[i] != -1) {
+                printf(" %d ", args->queue_b->cars_array[i]);
+            }
+        }
+        
+        printf("\n");
+
         args->car->Town = args->B;
         args->car->Destination = args->A;
         args->B->count_cars += 1;
     } else {
         args->B->count_cars -= 1;
         args->queue_b->count_cars -= 1;
+
+        args->queue_b->cars_array[args->car->id] = -1;
+
         printf("A-%d %d>>> [<< %d <<] <<<%d %d-B\n", args->car->Destination->count_cars, args->queue_a->count_cars, args->car->id, args->queue_b->count_cars, args->car->Town->count_cars);
+
+        printf("A queue: ");
+        for(i = 0; i < N; i++) {
+            if(args->queue_a->cars_array[i] != -1) {
+                printf(" %d ", args->queue_a->cars_array[i]);
+            }
+        }
+
+        printf("\nB queue:");
+        for(i = 0; i < N; i++) {
+            if(args->queue_b->cars_array[i] != -1) {
+                printf(" %d ", args->queue_b->cars_array[i]);
+            }
+        }
+        
+        printf("\n");
+
         args->car->Town = args->A;
         args->car->Destination = args->B;
         args->A->count_cars += 1;
