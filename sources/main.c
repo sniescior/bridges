@@ -88,6 +88,11 @@ int main(int argc, char * const argv[]) {
         return 1;
     }
 
+    printf("Number of cars initially: %d\n", N);
+    if(d) {
+        printf("Debug active. \n");
+    }
+
     pthread_mutex_init(&mutex, NULL);
     pthread_cond_init(&bridge_cond, NULL);
     pthread_t th[N];
