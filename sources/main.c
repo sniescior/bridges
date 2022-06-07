@@ -10,6 +10,7 @@
 #include "../headers/queue.h"
 
 int N = 3;
+int d = 0;
 pthread_mutex_t mutex;
 
 struct arg_struct {
@@ -29,11 +30,15 @@ void *town(void* arg) {
         struct arg_struct *args = arg;
         int town_tour_time = rand() % 10 + 1;
 
-        printf("\tCar %d chilling in town %s (%d seconds). (queue_a = %d queue_b = %d)\n", args->car->id, args->car->Town->name, town_tour_time, args->queue_a->count_cars, args->queue_b->count_cars);
+        if(d) {
+            printf("\tCar %d chilling in town %s (%d seconds). (queue_a = %d queue_b = %d)\n", args->car->id, args->car->Town->name, town_tour_time, args->queue_a->count_cars, args->queue_b->count_cars);
+        }
 
         sleep(town_tour_time);
 
-        printf("\t\tCar %d would want to pass the bridge now.\n", args->car->id);
+        if(d) {
+            printf("\t\tCar %d would want to pass the bridge now.\n", args->car->id);
+        }
 
         if(args->car->Town == args->A) {
             args->queue_a->count_cars += 1;
@@ -47,7 +52,26 @@ void *town(void* arg) {
     }
 }
 
-int main(int argc, char const *argv[]) {
+int main(int argc, char * const argv[]) {
+
+    int opt;
+    while((opt = getopt(argc, argv, "N:n:d")) != -1) {
+        switch (opt) {
+            case 'N':
+                N = atoi(optarg);
+                printf("Number of cars initially: %d\n", N);
+                break;
+            case 'n':
+                N = atoi(optarg);
+                printf("Number of cars initially: %d\n", N);
+                break;
+            case 'd':
+                d = 1;
+                printf("Debug active: \n");
+                break;
+        }
+    }
+
     pthread_mutex_init(&mutex, NULL);
     pthread_t th[N];
 
