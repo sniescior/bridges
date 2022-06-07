@@ -76,7 +76,7 @@ int main(int argc, char * const argv[]) {
 
     printf("Number of cars initially: %d\n", N);
     if(d) {
-        printf("Debug active: \n");
+        printf("Debug active. \n");
     }
 
     pthread_mutex_init(&mutex, NULL);
