@@ -159,21 +159,23 @@ void bridge(void *arg) {
 
         printf("A-%d %d>>> [>> %d >>] <<<%d %d-B\n", args->car->Town->count_cars, args->queue_a->count_cars, args->car->id, args->queue_b->count_cars, args->car->Destination->count_cars);
 
-        printf("A queue: ");
-        for(i = 0; i < N; i++) {
-            if(args->queue_a->cars_array[i] != -1) {
-                printf(" %d ", args->queue_a->cars_array[i]);
+        if(d) {
+            printf("A queue: ");
+            for(i = 0; i < N; i++) {
+                if(args->queue_a->cars_array[i] != -1) {
+                    printf(" %d ", args->queue_a->cars_array[i]);
+                }
             }
-        }
 
-        printf("\nB queue:");
-        for(i = 0; i < N; i++) {
-            if(args->queue_b->cars_array[i] != -1) {
-                printf(" %d ", args->queue_b->cars_array[i]);
+            printf("\nB queue:");
+            for(i = 0; i < N; i++) {
+                if(args->queue_b->cars_array[i] != -1) {
+                    printf(" %d ", args->queue_b->cars_array[i]);
+                }
             }
+            
+            printf("\n");
         }
-        
-        printf("\n");
 
         args->car->Town = args->B;
         args->car->Destination = args->A;
@@ -186,21 +188,23 @@ void bridge(void *arg) {
 
         printf("A-%d %d>>> [<< %d <<] <<<%d %d-B\n", args->car->Destination->count_cars, args->queue_a->count_cars, args->car->id, args->queue_b->count_cars, args->car->Town->count_cars);
 
-        printf("A queue: ");
-        for(i = 0; i < N; i++) {
-            if(args->queue_a->cars_array[i] != -1) {
-                printf(" %d ", args->queue_a->cars_array[i]);
+        if(d) {
+            printf("A queue: ");
+            for(i = 0; i < N; i++) {
+                if(args->queue_a->cars_array[i] != -1) {
+                    printf(" %d ", args->queue_a->cars_array[i]);
+                }
             }
-        }
 
-        printf("\nB queue:");
-        for(i = 0; i < N; i++) {
-            if(args->queue_b->cars_array[i] != -1) {
-                printf(" %d ", args->queue_b->cars_array[i]);
+            printf("\nB queue:");
+            for(i = 0; i < N; i++) {
+                if(args->queue_b->cars_array[i] != -1) {
+                    printf(" %d ", args->queue_b->cars_array[i]);
+                }
             }
+            
+            printf("\n");
         }
-        
-        printf("\n");
 
         args->car->Town = args->A;
         args->car->Destination = args->B;
