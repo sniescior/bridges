@@ -59,17 +59,24 @@ int main(int argc, char * const argv[]) {
         switch (opt) {
             case 'N':
                 N = atoi(optarg);
-                printf("Number of cars initially: %d\n", N);
                 break;
             case 'n':
                 N = atoi(optarg);
-                printf("Number of cars initially: %d\n", N);
                 break;
             case 'd':
                 d = 1;
-                printf("Debug active: \n");
                 break;
         }
+    }
+
+    if(N < 1) {
+        printf("Wrong number of cars. Exit.\n");
+        return 1;
+    }
+
+    printf("Number of cars initially: %d\n", N);
+    if(d) {
+        printf("Debug active: \n");
     }
 
     pthread_mutex_init(&mutex, NULL);
