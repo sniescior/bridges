@@ -11,7 +11,8 @@
 
 // Condition variables version
 
-int N = 10;
+int N = 3;
+int d = 0;
 pthread_mutex_t mutex;
 pthread_cond_t bridge_cond;
 int free_bridge = 1;    // 1 - bridge is free | 0 - bridge is occupied
@@ -33,30 +34,60 @@ void *town(void* arg) {
         struct arg_struct *args = arg;
         int town_tour_time = rand() % 10 + 1;
 
-        printf("\tCar %d chilling in town %s (%d seconds). (queue_a = %d queue_b = %d)\n", args->car->id, args->car->Town->name, town_tour_time, args->queue_a->count_cars, args->queue_b->count_cars);
+        if(d) {
+            printf("\tCar %d chilling in town %s (%d seconds). (queue_a = %d queue_b = %d)\n", args->car->id, args->car->Town->name, town_tour_time, args->queue_a->count_cars, args->queue_b->count_cars);
+        }
 
         sleep(town_tour_time);
 
-        printf("\t\tCar %d would want to pass the bridge now.\n", args->car->id);
+        if(d) {
+            printf("\t\tCar %d would want to pass the bridge now.\n", args->car->id);
+        }
 
         if(args->car->Town == args->A) {
             args->queue_a->count_cars += 1;
         } else {
             args->queue_b->count_cars += 1;
         }
+
         pthread_mutex_lock(&mutex);
         if(free_bridge) {
             bridge(arg);
-            printf("Bridge released.\n");
+            if(d) {
+                printf("\t\tBridge is now free.\n");
+            }
         } else {
-            printf("Bridge occupied. Waiting...\n");
+            if(d) {
+                printf("\t\tBridge occupied. Waiting...\n");
+            }
             pthread_cond_wait(&bridge_cond, &mutex);
         }
         pthread_mutex_unlock(&mutex);
     }
 }
 
-int main(int argc, char const *argv[]) {
+int main(int argc, char * const argv[]) {
+
+    int opt;
+    while((opt = getopt(argc, argv, "N:n:d")) != -1) {
+        switch (opt) {
+            case 'N':
+                N = atoi(optarg);
+                break;
+            case 'n':
+                N = atoi(optarg);
+                break;
+            case 'd':
+                d = 1;
+                break;
+        }
+    }
+
+    if(N < 1) {
+        printf("Wrong number of cars. Exit.\n");
+        return 1;
+    }
+
     pthread_mutex_init(&mutex, NULL);
     pthread_cond_init(&bridge_cond, NULL);
     pthread_t th[N];
@@ -141,7 +172,7 @@ void bridge(void *arg) {
 
     free_bridge = 1;
     pthread_cond_signal(&bridge_cond);
-    free(arg);
+    // free(arg);
 }
 
 void init_thread(Town *A, Town *B, Car *car, int i, pthread_t *th, struct Queue *queue_a, struct Queue *queue_b) {
