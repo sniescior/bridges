@@ -9,7 +9,7 @@
 #include "../headers/thread.h"
 #include "../headers/queue.h"
 
-int N = 10;
+int N = 3;
 pthread_mutex_t mutex;
 
 struct arg_struct {
@@ -111,23 +111,21 @@ void bridge(void *arg) {
 
     if(args->car->Town == args->A) {
         args->A->count_cars -= 1;
+        args->queue_a->count_cars -= 1;
         printf("A-%d %d>>> [>> %d >>] <<<%d %d-B\n", args->car->Town->count_cars, args->queue_a->count_cars, args->car->id, args->queue_b->count_cars, args->car->Destination->count_cars);
         args->car->Town = args->B;
         args->car->Destination = args->A;
         args->B->count_cars += 1;
-        args->queue_a->count_cars -= 1;
     } else {
         args->B->count_cars -= 1;
+        args->queue_b->count_cars -= 1;
         printf("A-%d %d>>> [<< %d <<] <<<%d %d-B\n", args->car->Destination->count_cars, args->queue_a->count_cars, args->car->id, args->queue_b->count_cars, args->car->Town->count_cars);
         args->car->Town = args->A;
         args->car->Destination = args->B;
         args->A->count_cars += 1;
-        args->queue_b->count_cars -= 1;
     }
 
     sleep(5);
-
-    free(arg);
 }
 
 void init_thread(Town *A, Town *B, Car *car, int i, pthread_t *th, struct Queue *queue_a, struct Queue *queue_b) {
