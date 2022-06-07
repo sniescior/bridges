@@ -47,7 +47,25 @@ void *town(void* arg) {
     }
 }
 
-int main(int argc, char const *argv[]) {
+int main(int argc, char * const argv[]) {
+
+    int opt;
+    while((opt = getopt(argc, argv, "N:n:d")) != -1) {
+        switch (opt) {
+            case 'N':
+                N = atoi(optarg);
+                printf("Number of cars initially: %d\n", N);
+                break;
+            case 'n':
+                N = atoi(optarg);
+                printf("Number of cars initially: %d\n", N);
+                break;
+            case 'd':
+                printf("Debug active: \n");
+                break;
+        }
+    }
+
     pthread_mutex_init(&mutex, NULL);
     pthread_t th[N];
 
