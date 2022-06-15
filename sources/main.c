@@ -161,8 +161,11 @@ void bridge(void *arg) {
             printf("A queue: ");
             print_queue(args->queue_a);
 
-            printf("\nB queue: ");
+            printf("B queue: ");
             print_queue(args->queue_b);
+
+            printf("General queue: ");
+            print_queue(args->bridge_queue);
             
             printf("\n");
         }
@@ -185,8 +188,11 @@ void bridge(void *arg) {
             printf("A queue: ");
             print_queue(args->queue_a);
 
-            printf("\nB queue: ");
+            printf("B queue: ");
             print_queue(args->queue_b);
+
+            printf("General queue: ");
+            print_queue(args->bridge_queue);
             
             printf("\n");
         }
