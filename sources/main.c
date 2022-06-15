@@ -23,11 +23,12 @@ struct arg_struct {
     Car *car;
     struct Queue *queue_a;
     struct Queue *queue_b;
+    struct Queue *bridge_queue;
 } *args;
 
-void init_cars(Town *A, Town *B, Car *car_list, pthread_t *th, struct Queue *queue_a, struct Queue *queue_b);
+void init_cars(Town *A, Town *B, Car *car_list, pthread_t *th, struct Queue *queue_a, struct Queue *queue_b, struct Queue *bridge_queue);
 void bridge(void *arg);
-void init_thread(Town *A, Town *B, Car *car_list, int i, pthread_t *th, struct Queue *queue_a, struct Queue *queue_b);
+void init_thread(Town *A, Town *B, Car *car_list, int i, pthread_t *th, struct Queue *queue_a, struct Queue *queue_b, struct Queue *bridge_queue);
 
 void *town(void* arg) {
     while(1) {
@@ -46,8 +47,10 @@ void *town(void* arg) {
 
         if(args->car->Town == args->A) {
             enqueue(args->queue_a, args->car->id);
+            enqueue(args->bridge_queue, args->car->id);
         } else {
             enqueue(args->queue_b, args->car->id);
+            enqueue(args->bridge_queue, args->car->id);
         }
 
         pthread_mutex_lock(&mutex);
@@ -106,10 +109,12 @@ int main(int argc, char * const argv[]) {
 
     struct Queue queue_a;
     struct Queue queue_b;
+    struct Queue bridge_queue;
     init_queue(&queue_a, N);
     init_queue(&queue_b, N);
+    init_queue(&bridge_queue, N);
 
-    init_cars(&A, &B, car_list, th, &queue_a, &queue_b);
+    init_cars(&A, &B, car_list, th, &queue_a, &queue_b, &bridge_queue);
 
     pthread_mutex_destroy(&mutex);
     pthread_cond_destroy(&bridge_cond);
@@ -117,7 +122,7 @@ int main(int argc, char * const argv[]) {
     return 0;
 }
 
-void init_cars(Town *A, Town *B, Car *car_list, pthread_t *th, struct Queue *queue_a, struct Queue *queue_b) {
+void init_cars(Town *A, Town *B, Car *car_list, pthread_t *th, struct Queue *queue_a, struct Queue *queue_b, struct Queue *bridge_queue) {
     int i, a, b;
     srand(time(NULL));
     a = rand() % N + 1;
@@ -142,7 +147,7 @@ void init_cars(Town *A, Town *B, Car *car_list, pthread_t *th, struct Queue *que
     }
 
     for(i = 0; i < N; i++) {
-        init_thread(A, B, &car_list[i], i, th, queue_a, queue_b);
+        init_thread(A, B, &car_list[i], i, th, queue_a, queue_b, bridge_queue);
     }
 
     for(i = 0; i < N; i++) {
@@ -159,8 +164,13 @@ void bridge(void *arg) {
 
     int i;
     if(args->car->Town == args->A) {
+        if(args->car->id != args->bridge_queue->cars_array[args->bridge_queue->front]) {
+            return;
+        }
+
         args->A->count_cars -= 1;
         dequeue(args->queue_a);
+        dequeue(args->bridge_queue);
 
         printf("A-%d %d>>> [>> %d >>] <<<%d %d-B\n", args->car->Town->count_cars, args->queue_a->count_cars, args->car->id, args->queue_b->count_cars, args->car->Destination->count_cars);
 
@@ -168,8 +178,11 @@ void bridge(void *arg) {
             printf("A queue: ");
             print_queue(args->queue_a);
 
-            printf("\nB queue: ");
+            printf("B queue: ");
             print_queue(args->queue_b);
+
+            printf("General queue: ");
+            print_queue(args->bridge_queue);
             
             printf("\n");
         }
@@ -178,8 +191,13 @@ void bridge(void *arg) {
         args->car->Destination = args->A;
         args->B->count_cars += 1;
     } else {
+        if(args->car->id != args->bridge_queue->cars_array[args->bridge_queue->front]) {
+            return;
+        }
+
         args->B->count_cars -= 1;
         dequeue(args->queue_b);
+        dequeue(args->bridge_queue);
 
         printf("A-%d %d>>> [<< %d <<] <<<%d %d-B\n", args->car->Destination->count_cars, args->queue_a->count_cars, args->car->id, args->queue_b->count_cars, args->car->Town->count_cars);
 
@@ -187,8 +205,11 @@ void bridge(void *arg) {
             printf("A queue: ");
             print_queue(args->queue_a);
 
-            printf("\nB queue: ");
+            printf("B queue: ");
             print_queue(args->queue_b);
+
+            printf("General queue: ");
+            print_queue(args->bridge_queue);
             
             printf("\n");
         }
@@ -204,13 +225,14 @@ void bridge(void *arg) {
     pthread_cond_signal(&bridge_cond);
 }
 
-void init_thread(Town *A, Town *B, Car *car, int i, pthread_t *th, struct Queue *queue_a, struct Queue *queue_b) {
+void init_thread(Town *A, Town *B, Car *car, int i, pthread_t *th, struct Queue *queue_a, struct Queue *queue_b, struct Queue *bridge_queue) {
     args = malloc(sizeof(struct arg_struct));
     args->A = A;
     args->B = B;
     args->car = car;
     args->queue_a = queue_a;
     args->queue_b = queue_b;
+    args->bridge_queue = bridge_queue;
 
     if(pthread_create(&th[i], NULL, &town, args) != 0) { 
         perror("Failed to create thread.\n");
