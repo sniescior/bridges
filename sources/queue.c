@@ -4,7 +4,7 @@
 
 void init_queue(struct Queue *queue, int N) {
     queue->cars_array = malloc(sizeof(int)*N);
-    queue->front = -1;
+    queue->front = 0;
     queue->rear = -1;
     queue->count_cars = 0;
 }
